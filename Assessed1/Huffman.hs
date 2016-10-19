@@ -91,3 +91,20 @@ buildTable (Branch a t1 t2) (str,x)    = (buildTable t1 ((str++"0"),x))++(buildT
 
 buildTableMain :: HuffTree -> [(String, Char)]
 buildTableMain tr = buildTable tr ("",' ')
+
+
+--function from String to bit
+stringToBit ::String -> [(String,Char)]  -> String
+stringToBit xs ls = concat [ str | x <- xs, (str,ch) <- ls, x==ch]
+
+
+--function from bit to String
+bitToString :: String -> HuffTree -> String
+bitToString xs t = bitToStringHelp xs t t
+
+
+bitToStringHelp :: String -> HuffTree -> HuffTree -> String
+bitToStringHelp xs     (End a b) t2                    = b : bitToStringHelp xs t2 t2
+bitToStringHelp []     t1 t2                           = ""
+bitToStringHelp (x:xs) (Branch a t3 t4) t2 | x == '0'  = bitToStringHelp xs t3 t2
+                                           | otherwise = bitToStringHelp xs t4 t2
