@@ -1,7 +1,7 @@
 -- Test cases
 
 import MorseLib
-import morse
+import Morse
 
 -- Q1.1
 input1 :: [String]
