@@ -55,14 +55,14 @@ returnNumber []           = []
 returnNumber (x:xs) | checkInt x /= Nothing = x : returnNumber xs
                     | otherwise             = []
 
-readInteger ::Eq c => String -> (Int, Tree c, String)
-readInteger xs =   undefined--(n,len)
---                  where ys = drop n temp
-  --                	    tr   = read (take n temp) :: Tree
-    --                    temp = drop len xs
-      --                  len  = length ls
-        --                n    = read ls :: Int
-          --              ls   = returnNumber xs
+readInteger ::String -> (Tree Char, String)
+readInteger xs = (tr, ys)
+                  where ys   = drop n temp
+                        tr   = (read (take n temp) :: Tree Char)
+                        temp = drop len xs
+                        len  = length ls
+                        n    = read ls :: Int
+                        ls   = returnNumber xs
 
 
 --functions which transfers list of '0's and '1's to list of Bit 
@@ -74,8 +74,8 @@ toBits (x:xs) | x == '0'  = Z : toBits xs
 
 decompress :: String -> String
 decompress xs = decode (tr,bits)
-               where bits       = toBits seq
-                     (n,tr,seq) = readInteger xs
+               where bits     = toBits seq
+                     (tr,seq) = readInteger xs
 
 {--- Decompression for a smarter compression algorithm: For a short
 string or a random string, the Huffman code of the string is longer
@@ -115,13 +115,14 @@ freq (Branch _ _ i) = i
 tabulate :: Eq c => [c] -> [Freq c]
 tabulate xs = freqHelp xs []
 
-
+--helper function for tabulate
 freqHelp :: Eq c => [c] -> [Freq c] -> [Freq c]
 freqHelp []     ls = ls
 freqHelp (x:xs) ls = freqHelp zs ((x,num):ls)
                      where (num,zs) = countRemove xs x 1 []
 
-
+--Function which counts the number of occurances of particular element
+--and removes them from the list of elements [c]
 countRemove :: Eq c => [c]  -> c -> Int -> [c] -> (Int, [c])
 countRemove []     ch n ls             =  (n,ls)                         
 countRemove (x:xs) ch n ls | x==ch     =  countRemove xs ch (n+1) ls
