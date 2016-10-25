@@ -116,7 +116,7 @@ freq (Branch _ _ i) = i
 
 --Generates a frequency table. 
 tabulate :: Eq c => [c] -> [Freq c]
-tabulate xs = sorting ( freqHelp xs [])
+tabulate xs =  freqHelp xs []
 
 --helper function for tabulate
 freqHelp :: Eq c => [c] -> [Freq c] -> [Freq c]
@@ -131,9 +131,6 @@ countRemove []     ch n ls             =  (n,ls)
 countRemove (x:xs) ch n ls | x==ch     =  countRemove xs ch (n+1) ls
                            | otherwise =  countRemove xs ch n     (ls++[x])
 
-
-sorting :: [Freq c] -> [Freq c]
-sorting =  reverse . sortBy (comparing snd) 
 
 compressTest :: Bool
 compressTest = uncompressedString == decompress' compressedString
