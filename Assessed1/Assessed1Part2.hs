@@ -218,10 +218,22 @@ encode xs = (tr, bits)
 --    * t is read from a tree, and contains exactly n characters.
 --    * c is string of bits.
 compress :: String -> String
-compress = undefined
+compress xs = n ++ tr ++ bits
+            where  n        = show len
+            	   len      = length tr
+            	   bits     = map readChar bit
+            	   tr       = show tre
+                   (tre,bit)= encode xs 
+
+
+
+readChar :: Bit -> Char
+readChar  Z = '0'
+readChar  I = '1'
 
 -- Question:
 -- Smarter compression: if the encoded string is larger than the input string,
 -- instead output the input string with a '*' in front.
 compress' :: String -> String
-compress' = undefined
+compress' xs = if 
+	            where 
