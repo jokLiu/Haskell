@@ -13,7 +13,7 @@ data Tree c = Leaf c Int | Branch (Tree c) (Tree c) Int
     deriving (Show, Eq, Ord, Read)
 
 data Bit = Z | I
-    deriving (Eq, Ord)
+    deriving (Eq, Ord, Show)
 
 readBit :: Char -> Bit
 readBit '0' = Z
@@ -150,7 +150,7 @@ merge = undefined
 -- Question:
 -- Generate a tree from list of Freqs (using makeTreeHelper above):
 generateTree :: [Freq c] -> Tree c
-generateTree xs = makeTreeHelper [ (Leaf c n) | (c,n) <- xs]
+generateTree xs = makeTreeHelper (sorting [ (Leaf c n) | (c,n) <- xs])
 
 
 
@@ -180,17 +180,30 @@ makeTableHelp (Branch t1 t2 a) xs   = (makeTableHelp t1 (xs++[Z])) ++ (makeTable
 -- Question:
 -- Takes a string of symbols to a bit string, based on a given coding table
 encodeUsingTable :: Eq c => CodingTable c -> [c] -> [Bit]
-encodeUsingTable = undefined
+encodeUsingTable tbl xs = concat [ ls | x <- xs, (a, ls)<-tbl, x==a]
 
 -- Question:
 -- Encodes directly from the tree (more efficient).
 encodeUsing :: Eq c => Tree c -> [c] -> [Bit]
-encodeUsing = undefined
+encodeUsing tr xs = concat ( map (encodeUsingHelper tr []) xs)
+
+
+
+
+encodeUsingHelper :: Eq c => Tree c ->  [Bit] -> c -> [Bit]
+encodeUsingHelper (Leaf k _) ls n  | k == n    = ls
+                                   | otherwise = []
+encodeUsingHelper (Branch t1 t2 _) ls n        =  (encodeUsingHelper t1 (ls++[Z]) n) ++ (encodeUsingHelper t2 (ls++[I])  n)
+
 
 -- Question:
 -- From a string of symbols, generate the coding tree and the encoding
 encode :: Eq c => [c] -> (Tree c, [Bit])
-encode = undefined
+encode xs = (tr, bits)
+              where bits  = encodeUsing tr xs
+              	    tr    = generateTree table
+              	    table = tabulate xs
+
 
 -- Encoding trees
 
