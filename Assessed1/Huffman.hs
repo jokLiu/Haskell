@@ -69,7 +69,7 @@ toHuffList ((a,b):xs) = (End b a) : toHuffList xs
 
 --function for putting element into the right place in the list
 put :: HuffTree -> [HuffTree] -> [HuffTree]
-put x ls = [y |  y <- ls , (takeValue x >= takeValue y)] ++ [x] ++ [y |  y <- ls , (takeValue x < takeValue y)]
+put x ls = [y |  y <- ls , (takeValue x > takeValue y)] ++ [x] ++ [y |  y <- ls , (takeValue x <= takeValue y)]
 
 
 --function which builds a tree 
@@ -108,3 +108,33 @@ bitToStringHelp xs     (End a b) t2                    = b : bitToStringHelp xs 
 bitToStringHelp []     t1 t2                           = ""
 bitToStringHelp (x:xs) (Branch a t3 t4) t2 | x == '0'  = bitToStringHelp xs t3 t2
                                            | otherwise = bitToStringHelp xs t4 t2
+
+
+
+
+
+
+
+------------------------------
+--code from the assignment 
+--sorting
+
+-Generates a frequency table. 
+tabulate :: Eq c => [c] -> [Freq c]
+tabulate xs = sorting ( freqHelp xs [])
+
+--helper function for tabulate
+freqHelp :: Eq c => [c] -> [Freq c] -> [Freq c]
+freqHelp []     ls = ls
+freqHelp (x:xs) ls = freqHelp zs ((x,num):ls)
+                     where (num,zs) = countRemove xs x 1 []
+
+--Function which counts the number of occurances of particular element
+--and removes them from the list of elements [c]
+countRemove :: Eq c => [c]  -> c -> Int -> [c] -> (Int, [c])
+countRemove []     ch n ls             =  (n,ls)                         
+countRemove (x:xs) ch n ls | x==ch     =  countRemove xs ch (n+1) ls
+                           | otherwise =  countRemove xs ch n     (ls++[x])
+
+sorting :: [Freq c] -> [Freq c]
+sorting =  reverse . sortBy (comparing snd) 
