@@ -9,11 +9,18 @@ import Text.Read
 import Data.List
 import Data.Ord
 
+
 data Tree c = Leaf c Int | Branch (Tree c) (Tree c) Int
     deriving (Show, Eq, Ord, Read)
 
 data Bit = Z | I
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
+
+instance Show Bit where
+    show Z = "0"
+    show I = "1"
+    showList [] = id
+    showList (x:xs) = \out -> (show x) ++ showList xs out
 
 readBit :: Char -> Bit
 readBit '0' = Z
@@ -74,7 +81,7 @@ memSize s = 8 * (length s)
 -- followed by a string, or as in the original decompression function:
 decompress' :: String -> String
 decompress' ('*':s)   = s
-decompress' s@('(':_) = decompress s
+decompress' s = decompress s
 
 -- Generate the frequency table
 -- An element of the type Freq is a symbol together with its frequency.
@@ -185,8 +192,17 @@ encodeUsingTable tbl xs = concat [ ls | x <- xs, (a, ls)<-tbl, x==a]
 -- Question:
 -- Encodes directly from the tree (more efficient).
 encodeUsing :: Eq c => Tree c -> [c] -> [Bit]
-encodeUsing tr xs = concat ( map (encodeUsingHelper tr []) xs)
+encodeUsing tr xs = concat (map (encodeHelp [(tr,[])]) xs )
+	--concat ( map (encodeUsingHelper tr []) xs)
 
+
+
+
+encodeHelp :: Eq c => [((Tree c),[Bit])] -> c -> [Bit]
+encodeHelp (((Leaf a b),ls):xss) n     | n == a    = ls
+                                       | otherwise = encodeHelp xss n
+encodeHelp (((Branch t1 t2 b),ls):xss) n           = encodeHelp (xss++[(t1,(ls++[Z]))]++[(t2,(ls++[I]))]) n
+encodeHelp []                          n           = []
 
 
 
@@ -235,5 +251,9 @@ readChar  I = '1'
 -- Smarter compression: if the encoded string is larger than the input string,
 -- instead output the input string with a '*' in front.
 compress' :: String -> String
-compress' xs = if 
-	            where 
+compress' xs = if (memSize xs > (memSize n + memSize tr+length bits)) then n ++ tr ++ bits else "*"++xs
+	            where  n        = show len
+	                   len      = length tr
+	                   bits     = map readChar bit
+	                   tr       = show tre
+	                   (tre,bit)= encode xs 
