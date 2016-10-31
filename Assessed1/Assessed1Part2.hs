@@ -132,20 +132,20 @@ sorting xs = sortBy (comparing takeValue) xs
 
 -- Collects a list of trees into an optimal prefix tree.
 makeTreeHelper :: [Tree c] -> Tree c
-makeTreeHelper [x]    = x
+makeTreeHelper [x]        = x
 makeTreeHelper (x1:x2:xs) = case (x1,x2) of 
-                           (Leaf _ a , Leaf _ c)          -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
-                           (Leaf _ a , Branch _ _ c)      -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
-                           (Branch _ _ a  ,Leaf _ c)      -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
-                           (Branch _ _ a , Branch _ _ c)  -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
+                           (Leaf     _ a , Leaf     _ c) -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
+                           (Leaf     _ a , Branch _ _ c) -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
+                           (Branch _ _ a , Leaf     _ c) -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
+                           (Branch _ _ a , Branch _ _ c) -> makeTreeHelper (put (Branch x1 x2 (a+c)) xs)
 
-
+--putting the new tree into the sorted list of trees into appropirate place
 put :: Tree c -> [Tree c] -> [Tree c]
 put x ls = [y | y <- ls, (takeValue x > takeValue y)] ++ [x] ++ [ y | y <- ls , (takeValue x <= takeValue y)]
 
-
+--Taking the frequency value from a tree
 takeValue :: Tree c -> Int
-takeValue (Leaf _ n)      = n
+takeValue (Leaf     _ n)  = n
 takeValue (Branch _ _ n)  = n
 
 
@@ -155,9 +155,9 @@ merge :: Tree c -> Tree c -> Tree c
 merge = undefined
 
 -- Question:
--- Generate a tree from list of Freqs (using makeTreeHelper above):
+-- Generate a tree from list of Freqs (using makeTree above):
 generateTree :: [Freq c] -> Tree c
-generateTree xs = makeTreeHelper (sorting [ (Leaf c n) | (c,n) <- xs])
+generateTree xs = makeTree [(Leaf c n) | (c,n) <- xs]
 
 
 
@@ -189,27 +189,19 @@ makeTableHelp (Branch t1 t2 a) xs   = (makeTableHelp t1 (xs++[Z])) ++ (makeTable
 encodeUsingTable :: Eq c => CodingTable c -> [c] -> [Bit]
 encodeUsingTable tbl xs = concat [ ls | x <- xs, (a, ls)<-tbl, x==a]
 
+
+
 -- Question:
 -- Encodes directly from the tree (more efficient).
 encodeUsing :: Eq c => Tree c -> [c] -> [Bit]
 encodeUsing tr xs = concat (map (encodeHelp [(tr,[])]) xs )
-	--concat ( map (encodeUsingHelper tr []) xs)
 
-
-
-
+--helper function for encoding from tree
 encodeHelp :: Eq c => [((Tree c),[Bit])] -> c -> [Bit]
-encodeHelp (((Leaf a b),ls):xss) n     | n == a    = ls
-                                       | otherwise = encodeHelp xss n
-encodeHelp (((Branch t1 t2 b),ls):xss) n           = encodeHelp (xss++[(t1,(ls++[Z]))]++[(t2,(ls++[I]))]) n
-encodeHelp []                          n           = []
-
-
-
-encodeUsingHelper :: Eq c => Tree c ->  [Bit] -> c -> [Bit]
-encodeUsingHelper (Leaf k _) ls n  | k == n    = ls
-                                   | otherwise = []
-encodeUsingHelper (Branch t1 t2 _) ls n        =  (encodeUsingHelper t1 (ls++[Z]) n) ++ (encodeUsingHelper t2 (ls++[I])  n)
+encodeHelp (((Leaf a b),ls):xss)       n    | n == a    = ls
+                                            | otherwise = encodeHelp xss n
+encodeHelp (((Branch t1 t2 b),ls):xss) n                = encodeHelp (xss++[(t1,(ls++[Z]))]++[(t2,(ls++[I]))]) n
+encodeHelp []                          n                = []
 
 
 -- Question:
@@ -217,8 +209,8 @@ encodeUsingHelper (Branch t1 t2 _) ls n        =  (encodeUsingHelper t1 (ls++[Z]
 encode :: Eq c => [c] -> (Tree c, [Bit])
 encode xs = (tr, bits)
               where bits  = encodeUsing tr xs
-              	    tr    = generateTree table
-              	    table = tabulate xs
+                    tr    = generateTree table 
+                    table = tabulate xs
 
 
 -- Encoding trees
@@ -236,9 +228,9 @@ encode xs = (tr, bits)
 compress :: String -> String
 compress xs = n ++ tr ++ bits
             where  n        = show len
-            	   len      = length tr
-            	   bits     = map readChar bit
-            	   tr       = show tre
+                   len      = length tr
+                   bits     = map readChar bit
+                   tr       = show tre
                    (tre,bit)= encode xs 
 
 
@@ -251,9 +243,9 @@ readChar  I = '1'
 -- Smarter compression: if the encoded string is larger than the input string,
 -- instead output the input string with a '*' in front.
 compress' :: String -> String
-compress' xs = if (memSize xs > (memSize n + memSize tr+length bits)) then n ++ tr ++ bits else "*"++xs
-	            where  n        = show len
-	                   len      = length tr
-	                   bits     = map readChar bit
-	                   tr       = show tre
-	                   (tre,bit)= encode xs 
+compress' xs = if (memSize xs < (memSize n + memSize tr+length bits)) then ("*"++xs)  else (n ++ tr ++ bits)
+                where  n        = show len
+                       len      = length tr
+                       bits     = map readChar bit
+                       tr       = show tre
+                       (tre,bit)= encode xs 
