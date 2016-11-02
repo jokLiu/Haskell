@@ -56,3 +56,4 @@ test777 = compress (decompress compressedString) == compressedString
 -- compress` test
 
 test8 = compress' uncompressedString == "*"++uncompressedString
+test9 = decompress' (compress' (uncompressedString++uncompressedString)) == uncompressedString++uncompressedString
