@@ -325,21 +325,33 @@ invertBoard bd = [ reverse r | r <- rev ]
 -- We recommend that you experiment with the sample solution (Bram.autoResize)
 -- to see what is expected.
 
+
 autoResize :: Board -> Board
-autoResize bd = 
+autoResize bd = bd3
+                where bd3           = transpose (buildResize bd2 (west,east))
+                      (west, east)  = autoResHelper bd2 (7,7)
+                      bd2           = transpose (buildResize bd (north,south))
+                      (north,south) = autoResHelper bd (7,7)
 --autoResize = Bram.autoResize
 
---helper function which returns the smallest number of empty tiles before any letter from (top,bottom)
+
+--function which adds the Nothing to make board of the right size
+buildResize :: Board -> (Int,Int) -> Board
+buildResize bd (top,bottom) = [ (replicate top Nothing) ++ b ++ (replicate bottom Nothing) | b <- bd]
+
+--helper function which return the number to be added to each column from top and from the bottom in the column
 autoResHelper :: Board -> (Int,Int) -> (Int,Int)
-autoResHelper []     (top,bottom) = (top,bottom)
-autoResHelper (x:xs) (top,bottom) =  
+autoResHelper []     (top,bottom) = ((7-top),(7-bottom))
+autoResHelper (x:xs) (top,bottom) = autoResHelper xs (newTop,newBottom)
+                                       where newTop    = minimum ([(countNothing x 0)]++[top])
+                                             newBottom = minimum ([(countNothing (reverse x) 0)]++[bottom])
 
 
---count letter occurance from top of a single line
-countNumb :: [Maybe Char] -> Int -> Int
-countNumb []     n        = n
-countNumb (Nothing:xs)  n = countNumb xs (n+1)
-countNumb ((Just _):xs) n = n
+--count the Nothing occurance in the column until the first letter appears
+countNothing :: [Maybe Char] -> Int -> Int
+countNothing []     n        = n
+countNothing (Nothing:xs)  n = countNothing xs (n+1)
+countNothing ((Just _):xs) n = n
 
 -- The following errors may occur when attempting to play:
 data PlayError = NoFitOnBoard | NotOnRack | NotAWord deriving (Show)
