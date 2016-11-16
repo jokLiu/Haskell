@@ -16,66 +16,47 @@ import Sowpods
 import qualified Bram
 
 {-
-
 This includes parts 1 and 2 of the 2nd assessed exercise. An advanced
 set for high 1st class is missing and will be given in the second week
 of the exercise. With the current set here, you will be able to get a
 low 1st class mark.
-
 --------------------------------------------------------------------
   Preparation for the exercise
 --------------------------------------------------------------------
-
 (1) First install the sample solutions module with command
-
     $ sh install.sh
-
 This will create some subdirectories that you don't need to look at
 (but you may).
-
 (2) This will allows you to run this file with the command
-
     $ ghci -package-db=Bram/ghc Scrabble
-
 (3) At the moment, your exercises below are solved by ourselves, so
 that you can run them and see what output is expected. You will need
 to replace lines "Bram.*" by your own code (or keep them if you are
 not solving a particular exercise). All exercises are labeled by the
 word "exercise" in a comment.
-
 (4) Also we provide below code for you to use.
-
 (5) In the first deadline, we expect you to submit this file with
 about half of the questions answered.
-
 (6) In the second and last deadline, you should submit this file again,
-with all the work you managed to do.
-
+with all the wogit clone https://github.com/uob-fp/fp fprk you managed to do.
 (7) There will be an additional set of advanced exercises to get a
 high 1st class mark. With this set, you will be able to get a low 1st
 class mark.
-
 (8) The sample solutions module only works in the lab, and also only after
 module load ghc. If you want to work elsewhere, or if you want to double check
 that your solutions don't depend on the Bram module, you can replace "import
 qualified Bram" by "import qualified Blank as Bram", and run ghci using "ghci
 Scrabble.hs". Sample solutions will then be unavailable to ghci.
-
 --------------------------------------------------------------------
   The Exercise - Scrabble
 --------------------------------------------------------------------
-
 The exercise is based on the game Scrabble aka Words with Friends.
-
 Scrabble is quite a complicated game to implement, so we change a few
 rules to simplify it. We call the new game "SCRABOL". This game is
 very similar to Scrabble, with a couple of exceptions listed below. In
 particular, there are no blanks and parallel words are forbidden.
-
 That is, in Scrabble but not in SCRABOL, you can make the following
 play (indicated in uppercase):
-
-
       b
       e
       t
@@ -84,64 +65,48 @@ play (indicated in uppercase):
     A r
     X
     Y
-
-
 In Scrabble this is valid because the following three words are valid
 words: WE, AR, WAXY. But in our game, SCRABOL, this is not valid. In
 SCRABOL, only the following kind of play is allowed:
-
       b
       e
       t
       t
     W e A T H E R
       r
-
 Or:
-
       b
       e
       t
       t
       e
     W r I T T E N
-
 (Parallel play example adapted from
 http://blog.xjtian.com/post/51339158829/a-smarter-scrabble-ai-part-2-move-validation .)
-
 If you are not familiar with Scrabble, have a go online a bit to get a feel
 for the game, for instance at https://www.lexulous.com/ . (Warning: in
 Lexulous, you have 8 letters on your rack, whereas we always have 7.) You can
 also run the following command in ghci to play against the sample solution:
-
     playAgainstYourself sowpods "helloworld"
-
 The rules of Scrabble are given here: http://scrabble.hasbro.com/en-us/rules .
 The rules of SCRABOL are the same, with these exceptions, to make the game simpler:
-
 Setup
     The game consists of an infinite board and any number of players. The
     dictionary will be given to you.
-
 rule #1 (about playing words):
     For SCRABOL, parallel words are not allowed. That is, all words on the
     board stay unchanged, and exactly one word is added, intersecting with
     exactly one existing tile on the board.
-
 rule #2 (about completing a turn):
     We don't draw the letter tiles from a fixed pool of 100 tiles, but the
     computer randomly generates tiles (using the same frequency).
-
 rule #6 (about blanks)
     goes away, we don't have blanks.
-
 rule #8 (about challenging a play)
     becomes irrelevant; word validity is checked by the computer.
-
 rule #9 (about ending a game) becomes
     The game ends after a predetermined number of turns. We will determine
     this number later, it depends on how fast our program will run.
-
 -}
 
 type Dict = [String]
@@ -159,22 +124,18 @@ normDict = filter valid
     aToZ = "abcdefghijklmnopqrstuvwxyz"
 
 {-
-
 A board is represented by a list of lists, where each list is a
 column. Each column is a list of Maybe Char, where Nothing represents
 a vacant position, and Just c represents a position occupied by the
 character c. All the columns should be of equal length.
-
 -}
 
 type Board = [[Maybe Char]]
 
 {-
-
 A rack contains the list of tiles you can play, represented as a list
 of characters, that is, as a String. The order of the characters
 doesn't matter.
-
 -}
 
 type Rack = String
@@ -283,7 +244,8 @@ moveLetter move@(w, ((x, y), _)) (x', y') = do
 -- Tip: you may use the function 'transpose' from Data.List.
 
 boardFromWord :: String -> Board
-boardFromWord = transpose
+boardFromWord xs = [ [Just d] | b <- bd, d <- b ]
+                  where bd = transpose [xs]
 --boardFromWord = Bram.boardFromWord
 
 -- Exercise, basic. Count the number of occurrences of a character in a string.
@@ -291,7 +253,8 @@ boardFromWord = transpose
 -- numocc 'c' "abccbedcce" = 4
 
 numOcc :: Char -> String -> Int
-numOcc = Bram.numOcc
+numOcc ch xs = length (filter (\x -> x==ch) xs)
+--numOcc = Bram.numOcc
 
 -- Exercise, medium. Given two words, determine whether you can make
 -- the left word with the letters of the right word. You do not need
@@ -304,7 +267,8 @@ numOcc = Bram.numOcc
 -- Hint: look at Data.List, there are useful set functions there.
 
 submultiset :: String -> String -> Maybe String
-submultiset = Bram.submultiset
+submultiset xs zs = if null (xs \\ zs) then Just (zs \\ xs) else Nothing      
+--submultiset = Bram.submultiset
 
 -- Exercise, medium. Given a word, a list of letters on your rack, and the
 -- intersection point letter c, determine whether you can form the word on the
@@ -315,7 +279,8 @@ submultiset = Bram.submultiset
 -- formable "exercise" "seeqcixez" 'x' = Nothing
 
 formable :: String -> Rack -> Char -> Maybe String
-formable = Bram.formable
+formable xs rck ch = submultiset xs (ch:rck)
+--formable = Bram.formable
 
 -- Utility code given to you:
 letterValue :: Char -> Score
@@ -334,14 +299,17 @@ letterValue c | otherwise = error "not a valid letter"
 -- the individual letters.
 
 wordValue :: String -> Score
-wordValue = Bram.wordValue
+wordValue xs = sum [letterValue x | x <- xs] 
+--wordValue = Bram.wordValue
 
 -- Exercise, basic.
 --
 -- Given a board, rotate it 180 degrees. The resulting board has the same
 -- number of rows and columns as the input.
 invertBoard :: Board -> Board
-invertBoard = Bram.invertBoard
+invertBoard bd = [ reverse r | r <- rev ]
+                where rev = reverse bd
+--invertBoard = Bram.invertBoard
 
 
 -- Exercise, hard.
@@ -358,7 +326,20 @@ invertBoard = Bram.invertBoard
 -- to see what is expected.
 
 autoResize :: Board -> Board
-autoResize = Bram.autoResize
+autoResize bd = 
+--autoResize = Bram.autoResize
+
+--helper function which returns the smallest number of empty tiles before any letter from (top,bottom)
+autoResHelper :: Board -> (Int,Int) -> (Int,Int)
+autoResHelper []     (top,bottom) = (top,bottom)
+autoResHelper (x:xs) (top,bottom) =  
+
+
+--count letter occurance from top of a single line
+countNumb :: [Maybe Char] -> Int -> Int
+countNumb []     n        = n
+countNumb (Nothing:xs)  n = countNumb xs (n+1)
+countNumb ((Just _):xs) n = n
 
 -- The following errors may occur when attempting to play:
 data PlayError = NoFitOnBoard | NotOnRack | NotAWord deriving (Show)
@@ -690,5 +671,3 @@ printBoard b = checks `seq` actuallyPrint
 -- A right-aligned digit under 100.
 show2digs n | 0 <= 0 && n < 10 = " " ++ show n
 show2digs n | 0 <= 0 && n < 100 = show n
-
-
