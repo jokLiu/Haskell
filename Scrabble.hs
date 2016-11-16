@@ -283,7 +283,8 @@ moveLetter move@(w, ((x, y), _)) (x', y') = do
 -- Tip: you may use the function 'transpose' from Data.List.
 
 boardFromWord :: String -> Board
-boardFromWord = Bram.boardFromWord
+boardFromWord = transpose
+--boardFromWord = Bram.boardFromWord
 
 -- Exercise, basic. Count the number of occurrences of a character in a string.
 --

@@ -48,7 +48,9 @@ type Template = (Char, WordPos, Int, Int)
 
 
 boardFromWord :: String -> Board
-boardFromWord = undefined
+boardFromWord xs = transpose xs
+
+
 numOcc :: Char -> String -> Int
 numOcc = undefined
 submultiset :: String -> String -> Maybe String

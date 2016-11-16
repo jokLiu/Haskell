@@ -111,3 +111,23 @@ prime' n = null (factors n)
 listOfPrimeFactors :: [(Int , [Int])]
 listOfPrimeFactors = zip [2..] fsieve
 
+
+type Pair = (Int,Int)
+
+value :: Pair -> Int
+value (a,b) = a-b
+
+same:: Pair -> Pair -> Bool
+same (a,b) (c,d) = (a+d) == (c+b)
+
+lessOrEqual :: Pair -> Pair -> Bool
+lessOrEqual (a,b) (c,d) = b+c >= a+d
+
+addition :: Pair -> Pair -> Pair
+addition (a,b) (c,d) = ((a+c),(b+d))
+
+sub :: Pair -> Pair -> Pair
+sub (a,b) (c,d) = ((a+d),(b+c))
+
+mul :: Pair -> Pair -> Pair
+mul (a,b) (c,d) = ((a*c+b*d),(b*c+a*d))
