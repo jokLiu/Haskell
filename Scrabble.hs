@@ -49,7 +49,7 @@ word "exercise" in a comment.
 about half of the questions answered.
 
 (6) In the second and last deadline, you should submit this file again,
-with all the work you managed to do.
+with all the wogit clone https://github.com/uob-fp/fp fprk you managed to do.
 
 (7) There will be an additional set of advanced exercises to get a
 high 1st class mark. With this set, you will be able to get a low 1st
@@ -283,14 +283,17 @@ moveLetter move@(w, ((x, y), _)) (x', y') = do
 -- Tip: you may use the function 'transpose' from Data.List.
 
 boardFromWord :: String -> Board
-boardFromWord = Bram.boardFromWord
+boardFromWord xs = [ [Just d] | b <- bd, d <- b ]
+                  where bd = transpose [xs]
+--boardFromWord = Bram.boardFromWord
 
 -- Exercise, basic. Count the number of occurrences of a character in a string.
 --
 -- numocc 'c' "abccbedcce" = 4
 
 numOcc :: Char -> String -> Int
-numOcc = Bram.numOcc
+numOcc ch xs = length (filter (\x -> x==ch) xs)
+--numOcc = Bram.numOcc
 
 -- Exercise, medium. Given two words, determine whether you can make
 -- the left word with the letters of the right word. You do not need
@@ -303,7 +306,8 @@ numOcc = Bram.numOcc
 -- Hint: look at Data.List, there are useful set functions there.
 
 submultiset :: String -> String -> Maybe String
-submultiset = Bram.submultiset
+submultiset xs zs = if null (xs \\ zs) then Just (zs \\ xs) else Nothing      
+--submultiset = Bram.submultiset
 
 -- Exercise, medium. Given a word, a list of letters on your rack, and the
 -- intersection point letter c, determine whether you can form the word on the
@@ -314,7 +318,8 @@ submultiset = Bram.submultiset
 -- formable "exercise" "seeqcixez" 'x' = Nothing
 
 formable :: String -> Rack -> Char -> Maybe String
-formable = Bram.formable
+formable xs rck ch = submultiset xs (ch:rck)
+--formable = Bram.formable
 
 -- Utility code given to you:
 letterValue :: Char -> Score
@@ -333,14 +338,17 @@ letterValue c | otherwise = error "not a valid letter"
 -- the individual letters.
 
 wordValue :: String -> Score
-wordValue = Bram.wordValue
+wordValue xs = sum [letterValue x | x <- xs] 
+--wordValue = Bram.wordValue
 
 -- Exercise, basic.
 --
 -- Given a board, rotate it 180 degrees. The resulting board has the same
 -- number of rows and columns as the input.
 invertBoard :: Board -> Board
-invertBoard = Bram.invertBoard
+invertBoard bd = [ reverse r | r <- rev ]
+                where rev = reverse bd
+--invertBoard = Bram.invertBoard
 
 
 -- Exercise, hard.
@@ -357,7 +365,20 @@ invertBoard = Bram.invertBoard
 -- to see what is expected.
 
 autoResize :: Board -> Board
-autoResize = Bram.autoResize
+autoResize bd = 
+--autoResize = Bram.autoResize
+
+--helper function which returns the smallest number of empty tiles before any letter from (top,bottom)
+autoResHelper :: Board -> (Int,Int) -> (Int,Int)
+autoResHelper []     (top,bottom) = (top,bottom)
+autoResHelper (x:xs) (top,bottom) =  
+
+
+--count letter occurance from top of a single line
+countNumb :: [Maybe Char] -> Int -> Int
+countNumb []     n        = n
+countNumb (Nothing:xs)  n = countNumb xs (n+1)
+countNumb ((Just _):xs) n = n
 
 -- The following errors may occur when attempting to play:
 data PlayError = NoFitOnBoard | NotOnRack | NotAWord deriving (Show)
