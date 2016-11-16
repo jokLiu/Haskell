@@ -35,3 +35,36 @@ countNothing ((Just _):xs) n = n
 
 
 bd = [[Just 't'],[Just 'e'],[Just 's'],[Just 't']]
+
+
+-- Positions, as (x, y). As you go down, y increases; as you go right, x
+-- increases:
+type Pos = (Int, Int)
+
+-- An orientation can be horizontal (H) or vertical (V):
+data Orient = H | V deriving (Show, Eq, Read)
+
+-- A word position is a start position together with an orientation:
+type WordPos = (Pos, Orient)
+
+-- A move is a word (represented as a String) together with a position:
+type Move = (String, WordPos)
+
+-- A score is represented as an Int:
+type Score = Int
+
+
+-- Exercise, medium/hard. Given a board and a move that is to be executed on
+-- that board, put the move on the board and return the resulting board. You
+-- can assume that the given move is valid on the given board.
+
+writeMove :: Move -> Board -> Board
+writeMove (wrd,((x,y),V)) bd =  (take y bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (y+1) bd) 
+writeMove (wrd,((x,y),H)) bd =  transpose ((take x bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (x+1) bd2))
+                                where bd2 = transpose bd
+
+strToCharList :: String -> [Maybe Char]
+strToCharList xs = [Just x | x <- xs]
+
+
+--movetest = writeMove  (autoResize bd)

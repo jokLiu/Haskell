@@ -381,7 +381,17 @@ playMove rack move@(w, ((x, y), orient)) dict b = do
 -- can assume that the given move is valid on the given board.
 
 writeMove :: Move -> Board -> Board
-writeMove = Bram.writeMove . read . show
+--writeMove = Bram.writeMove . read . show
+
+writeMove (wrd,((x,y),V)) bd =  (take y bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (y+1) bd) 
+writeMove (wrd,((x,y),H)) bd =  transpose ((take x bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (x+1) bd2))
+                                where bd2 = transpose bd
+
+-- string to a list of maybe characters
+strToCharList :: String -> [Maybe Char]
+strToCharList xs = [Just x | x <- xs]
+
+
 
 -- Exercise, medium/hard. We now move to randomly adding letters to the rack.
 --
