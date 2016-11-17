@@ -383,8 +383,8 @@ playMove rack move@(w, ((x, y), orient)) dict b = do
 writeMove :: Move -> Board -> Board
 --writeMove = Bram.writeMove . read . show
 
-writeMove (wrd,((x,y),V)) bd =  (take y bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (y+1) bd) 
-writeMove (wrd,((x,y),H)) bd =  transpose ((take x bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (x+1) bd2))
+writeMove (wrd,((x,y),V)) bd =  (take x bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (x+1) bd) 
+writeMove (wrd,((x,y),H)) bd =  transpose ((take y bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (y+1) bd2))
                                 where bd2 = transpose bd
 
 -- string to a list of maybe characters
@@ -509,12 +509,14 @@ letterFrequencies = [
 -- We suggest that you make newLetter, because it will make replenishRack
 -- below easier to implement.
 newLetter :: LRand Char
-newLetter = let Bram.LRand f = Bram.newLetter in LRand f
+newLetter = fromList letterFrequencies
+--newLetter2 = let Bram.LRand f = Bram.newLetter in LRand f
 
 -- Exercise, medium/hard. Given a rack, randomly fill it with random
 -- letters, to have rackSize many letters.
 replenishRack :: Rack -> LRand Rack
-replenishRack rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
+replenishRack rk = sequence (pickUniformly ) (replicate (7-(length rk)) newLetter)
+replenishRack2 rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
 
 -- Code for visually testing your solution: let you play against yourself.
 --

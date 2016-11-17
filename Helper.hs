@@ -1,4 +1,11 @@
+import Control.Monad
+import Control.DeepSeq
+import Data.Char
 import Data.List
+import Data.Maybe
+import System.Console.Readline
+import System.IO.Unsafe
+import System.Random
 
 
 type Board = [[Maybe Char]]
@@ -68,3 +75,16 @@ strToCharList xs = [Just x | x <- xs]
 
 
 --movetest = writeMove  (autoResize bd)
+
+check = (sequence (take 1000 (repeat (runRandIO newLetter ))))
+
+help :: IO [Char] -> [Char]
+help xs = do x <- xs
+             x
+
+
+
+
+
+
+
