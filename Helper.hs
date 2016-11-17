@@ -1,12 +1,5 @@
-import Control.Monad
-import Control.DeepSeq
-import Data.Char
 import Data.List
-import Data.Maybe
-import System.Console.Readline
-import System.IO.Unsafe
-import System.Random
-
+import Sowpods
 
 type Board = [[Maybe Char]]
 
@@ -74,17 +67,67 @@ strToCharList :: String -> [Maybe Char]
 strToCharList xs = [Just x | x <- xs]
 
 
---movetest = writeMove  (autoResize bd)
+allWords1 :: [String] -> Char -> [String]
+allWords1 dt n = filter (\xs -> n `elem` xs) dt
 
-check = (sequence (take 1000 (repeat (runRandIO newLetter ))))
-
-help :: IO [Char] -> [Char]
-help xs = do x <- xs
-             x
+--	movetest = writeMove  (autoResize bd)
 
 
+-- Exercise, hard.
+--
+-- Say that we have the following row on our board:
+--
+--     X - - - - - - - E - - - - - - X
+--         E L S E W H E R E
+-- We're wondering which words would fit there, overlapping with the
+-- E. The word 'elsewhere' has four Es, and fits in two ways, namely
+-- with the middle two E's. (As always in SCRABOL, when you play a
+-- word they must overlap with exactly one tile on the board, so
+-- 'xenophobe' would not fit here.)
+--
+-- Given an "intersection letter" (in this case E), and the number of
+-- free spaces around it, find all the words that would fit in such a
+-- space. Also, give all the positions where that letter is anchored;
+-- in the example, 'elsewhere' can be anchored at positions 3 or 6.
+--
+-- In this example, the number of free spaces is 6 and 5,
+-- respectively, because we must leave some space around the Xes.
+--
+-- allWords2 dict 'e' 6 5 = [..., ("elsewhere", 3), ("elsewhere", 6"), ...]
+--
+-- allWords2 dict 'x' 1 2 = [("ax", 2), ("axe", 2), ("axed", 2),
+--    ("axes", 2), ("axis", 2), ("axle", 2), ("axon", 2), ("ex", 2), ("exam",
+--    2), ("exec", 2), ("exes", 2), ("exit", 2), ("expo", 2), ("ox", 2),
+--    ("oxen", 2), ("x", 1)]
+--
+-- (You may give the words in a different order.)
+
+type Dict = [String]
+
+allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
+allWords2 dict ch low up = concat [ fitList (findPosition str ch []) str low up | str <- (allWords1 dict ch) ]
+
+
+--find all positions of particular character in the single words
+findPosition :: String -> Char -> [Int] -> [Int]
+findPosition [] _  ls = normalise ls 0
+findPosition xs ch ls = case elemIndex ch xs of
+                             Nothing -> normalise ls 0
+                             Just x  -> findPosition (drop (x+1) xs) ch (ls++[x])
+
+--normalise the list of positions
+normalise :: [Int] -> Int -> [Int]
+normalise []     _ = []
+normalise (x:xs) n = (x+n) : normalise xs (x+n+1)
+
+--find all the posibilities to fit the particular word into the available space
+fitList :: [Int] -> String -> Int -> Int ->  [(String, Int)]
+fitList [] _ _ _  = []
+fitList (x:xs) str low up | (low >= x) && (up >= ((length str)-x-1)) = (str,x) : fitList xs str low up 
+                          | otherwise                                = fitList xs str low up
+                          
 
 
 
 
-
+--allWords2 = Bram.allWords2

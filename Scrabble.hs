@@ -13,7 +13,8 @@ import System.Random
 
 import Sowpods
 
-import qualified Bram
+--import qualified Bram
+import qualified Blank as Bram
 
 {-
 This includes parts 1 and 2 of the 2nd assessed exercise. An advanced
@@ -632,14 +633,15 @@ transposeTemp (c, wpos, before, after)
 -- certain letter. Word order does not matter.
 
 allWords1 :: Dict -> Char -> [String]
-allWords1 = Bram.allWords1
+allWords1 dt n = filter (\xs -> n `elem` xs) dt
+--allWords1 = Bram.allWords1
 
 -- Exercise, hard.
 --
 -- Say that we have the following row on our board:
 --
 --     X - - - - - - - E - - - - - - X
---
+--         E L S E W H E R E
 -- We're wondering which words would fit there, overlapping with the
 -- E. The word 'elsewhere' has four Es, and fits in two ways, namely
 -- with the middle two E's. (As always in SCRABOL, when you play a
@@ -664,7 +666,33 @@ allWords1 = Bram.allWords1
 -- (You may give the words in a different order.)
 
 allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
-allWords2 = Bram.allWords2
+--allWords2 = Bram.allWords2
+allWords2 dict ch low up = concat [ fitList (findPosition str ch []) str low up | str <- (allWords1 dict ch) ]
+
+
+--find all positions of particular character in the single words
+findPosition :: String -> Char -> [Int] -> [Int]
+findPosition [] _  ls = normalise ls 0
+findPosition xs ch ls = case elemIndex ch xs of
+                             Nothing -> normalise ls 0
+                             Just x  -> findPosition (drop (x+1) xs) ch (ls++[x])
+
+--normalise the list of positions
+normalise :: [Int] -> Int -> [Int]
+normalise []     _ = []
+normalise (x:xs) n = (x+n) : normalise xs (x+n+1)
+
+--find all the posibilities to fit the particular word into the available space
+fitList :: [Int] -> String -> Int -> Int ->  [(String, Int)]
+fitList [] _ _ _  = []
+fitList (x:xs) str low up | (low >= x) && (up >= ((length str)-x-1)) = (str,x) : fitList xs str low up 
+                          | otherwise                                = fitList xs str low up
+                          
+
+
+
+
+
 
 -- Exercise, medium.
 --
