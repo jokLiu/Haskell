@@ -103,7 +103,7 @@ allWords1 dt n = filter (\xs -> n `elem` xs) dt
 -- (You may give the words in a different order.)
 
 type Dict = [String]
-
+type Rack = String
 allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
 allWords2 dict ch low up = concat [ fitList (findPosition str ch []) str low up | str <- (allWords1 dict ch) ]
 
@@ -126,6 +126,11 @@ fitList [] _ _ _  = []
 fitList (x:xs) str low up | (low >= x) && (up >= ((length str)-x-1)) = (str,x) : fitList xs str low up 
                           | otherwise                                = fitList xs str low up
                           
+allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
+allWords3 dict rack ch low up = allWords2 ls ch low up
+                                  where ls = [ x |  x <- dict , ((length $ rack\\x) == ((length rack) - (length x)))]
+
+
 
 
 

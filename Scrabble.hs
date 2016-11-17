@@ -516,8 +516,8 @@ newLetter = fromList letterFrequencies
 -- Exercise, medium/hard. Given a rack, randomly fill it with random
 -- letters, to have rackSize many letters.
 replenishRack :: Rack -> LRand Rack
-replenishRack rk = sequence (pickUniformly ) (replicate (7-(length rk)) newLetter)
-replenishRack2 rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
+--replenishRack rk = sequence (pickUniformly ) (replicate (7-(length rk)) newLetter)
+replenishRack rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
 
 -- Code for visually testing your solution: let you play against yourself.
 --
@@ -634,7 +634,7 @@ transposeTemp (c, wpos, before, after)
 
 allWords1 :: Dict -> Char -> [String]
 allWords1 dt n = filter (\xs -> n `elem` xs) dt
---allWords1 = Bram.allWords1
+allWords11 = Bram.allWords1
 
 -- Exercise, hard.
 --
@@ -666,7 +666,7 @@ allWords1 dt n = filter (\xs -> n `elem` xs) dt
 -- (You may give the words in a different order.)
 
 allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
---allWords2 = Bram.allWords2
+allWords22 = Bram.allWords2
 allWords2 dict ch low up = concat [ fitList (findPosition str ch []) str low up | str <- (allWords1 dict ch) ]
 
 
@@ -700,7 +700,14 @@ fitList (x:xs) str low up | (low >= x) && (up >= ((length str)-x-1)) = (str,x) :
 -- (You may give the words in a different order.)
 
 allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
-allWords3 = Bram.allWords3
+allWords3 dict rack ch low up = allWords2 ls ch low up
+                                  where ls = [ x |  x <- dict , ((length $ rack\\x) == ((length rack) - (length x)))]
+
+allWords33 = Bram.allWords3
+
+
+
+
 
 
 -- Utility code, for manual testing:
