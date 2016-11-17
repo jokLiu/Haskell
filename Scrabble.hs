@@ -383,8 +383,8 @@ playMove rack move@(w, ((x, y), orient)) dict b = do
 writeMove :: Move -> Board -> Board
 --writeMove = Bram.writeMove . read . show
 
-writeMove (wrd,((x,y),V)) bd =  (take y bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (y+1) bd) 
-writeMove (wrd,((x,y),H)) bd =  transpose ((take x bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (x+1) bd2))
+writeMove (wrd,((x,y),V)) bd =  (take x bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (x+1) bd) 
+writeMove (wrd,((x,y),H)) bd =  transpose ((take y bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (y+1) bd2))
                                 where bd2 = transpose bd
 
 -- string to a list of maybe characters
