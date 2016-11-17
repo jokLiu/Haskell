@@ -13,8 +13,8 @@ import System.Random
 
 import Sowpods
 
---import qualified Bram
-import qualified Blank as Bram
+import qualified Bram
+--import qualified Blank as Bram
 
 {-
 This includes parts 1 and 2 of the 2nd assessed exercise. An advanced
@@ -701,7 +701,7 @@ fitList (x:xs) str low up | (low >= x) && (up >= ((length str)-x-1)) = (str,x) :
 
 allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
 allWords3 dict rack ch low up = allWords2 ls ch low up
-                                  where ls = [ x |  x <- dict , ((length $ rack\\x) == ((length rack) - (length x)))]
+                                  where ls = [ x |  x <- dict , ((length $ (rack++[ch])\\x) == ((length (rack++[ch])) - (length x)))]
 
 allWords33 = Bram.allWords3
 
