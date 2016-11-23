@@ -250,7 +250,7 @@ moveLetter move@(w, ((x, y), _)) (x', y') = do
 boardFromWord :: String -> Board
 boardFromWord xs = [ [Just d] | b <- bd, d <- b ]
                   where bd = transpose [xs]
---boardFromWord = Bram.boardFromWord
+--boardFromWord2 = Bram.boardFromWord
 
 -- Exercise, basic. Count the number of occurrences of a character in a string.
 --
@@ -258,7 +258,7 @@ boardFromWord xs = [ [Just d] | b <- bd, d <- b ]
 
 numOcc :: Char -> String -> Int
 numOcc ch xs = length (filter (\x -> x==ch) xs)
---numOcc = Bram.numOcc
+--numOcc2 = Bram.numOcc
 
 -- Exercise, medium. Given two words, determine whether you can make
 -- the left word with the letters of the right word. You do not need
@@ -272,7 +272,7 @@ numOcc ch xs = length (filter (\x -> x==ch) xs)
 
 submultiset :: String -> String -> Maybe String
 submultiset xs zs = if null (xs \\ zs) then Just (zs \\ xs) else Nothing      
---submultiset = Bram.submultiset
+--submultiset2 = Bram.submultiset
 
 -- Exercise, medium. Given a word, a list of letters on your rack, and the
 -- intersection point letter c, determine whether you can form the word on the
@@ -284,7 +284,7 @@ submultiset xs zs = if null (xs \\ zs) then Just (zs \\ xs) else Nothing
 
 formable :: String -> Rack -> Char -> Maybe String
 formable xs rck ch = submultiset xs (ch:rck)
---formable = Bram.formable
+--formable2 = Bram.formable
 
 -- Utility code given to you:
 letterValue :: Char -> Score
@@ -304,7 +304,7 @@ letterValue c | otherwise = error "not a valid letter"
 
 wordValue :: String -> Score
 wordValue xs = sum [letterValue x | x <- xs] 
---wordValue = Bram.wordValue
+--wordValue2 = Bram.wordValue
 
 -- Exercise, basic.
 --
@@ -313,7 +313,7 @@ wordValue xs = sum [letterValue x | x <- xs]
 invertBoard :: Board -> Board
 invertBoard bd = [ reverse r | r <- rev ]
                 where rev = reverse bd
---invertBoard = Bram.invertBoard
+--invertBoard2 = Bram.invertBoard
 
 
 -- Exercise, hard.
@@ -336,7 +336,7 @@ autoResize bd = bd3
                       (west, east)  = autoResHelper bd2 (7,7)
                       bd2           = transpose (buildResize bd (north,south))
                       (north,south) = autoResHelper bd (7,7)
---autoResize = Bram.autoResize
+--autoResize2 = Bram.autoResize
 
 
 --function which adds the Nothing to make board of the right size
@@ -385,16 +385,17 @@ playMove rack move@(w, ((x, y), orient)) dict b = do
 -- can assume that the given move is valid on the given board.
 
 writeMove :: Move -> Board -> Board
---writeMove = Bram.writeMove . read . show
 
 writeMove (wrd,((x,y),V)) bd =  (take x bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (x+1) bd) 
 writeMove (wrd,((x,y),H)) bd =  transpose ((take y bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (y+1) bd2))
                                 where bd2 = transpose bd
 
+
 -- string to a list of maybe characters
 strToCharList :: String -> [Maybe Char]
 strToCharList xs = [Just x | x <- xs]
 
+--writeMove = Bram.writeMove . read . show
 
 
 -- Exercise, medium/hard. We now move to randomly adding letters to the rack.
@@ -514,13 +515,13 @@ letterFrequencies = [
 -- below easier to implement.
 newLetter :: LRand Char
 newLetter = fromList letterFrequencies
-newLetter2 = let Bram.LRand f = Bram.newLetter in LRand f
+--newLetter2 = let Bram.LRand f = Bram.newLetter in LRand f
 
 -- Exercise, medium/hard. Given a rack, randomly fill it with random
 -- letters, to have rackSize many letters.
 replenishRack :: Rack -> LRand Rack
 replenishRack rk = do { x <- sequence (take (rackSize-(length rk)) (replicate rackSize newLetter)); return (rk++x) } 
-replenishRack2 rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
+--replenishRack2 rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
 
 -- Code for visually testing your solution: let you play against yourself.
 --
@@ -638,7 +639,7 @@ transposeTemp (c, wpos, before, after)
 
 allWords1 :: Dict -> Char -> [String]
 allWords1 dt n = filter (\xs -> n `elem` xs) dt
-allWords11 = Bram.allWords1
+--allWords11 = Bram.allWords1
 
 -- Exercise, hard.
 --
@@ -670,7 +671,7 @@ allWords11 = Bram.allWords1
 -- (You may give the words in a different order.)
 
 allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
-allWords22 = Bram.allWords2
+--allWords22 = Bram.allWords2
 allWords2 dict ch low up = concat [ fitList (findPosition str ch []) str low up | str <- (allWords1 dict ch) ]
 
 
@@ -707,7 +708,7 @@ allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
 allWords3 dict rack ch low up = allWords2 ls ch low up
                                   where ls = [ x |  x <- dict , ((length $ (rack++[ch])\\x) == ((length (rack++[ch])) - (length x)))]
 
-allWords33 = Bram.allWords3
+--allWords33 = Bram.allWords3
 
 
 
