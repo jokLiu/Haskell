@@ -7,9 +7,13 @@ import Control.DeepSeq
 import Data.Char
 import Data.List
 import Data.Maybe
-import System.Console.Readline
+--import System.Console.Readline
 import System.IO.Unsafe
 import System.Random
+
+import Control.Monad.State
+import Data.Either
+
 
 
 type Dict = [String]
@@ -45,10 +49,14 @@ instance Monad LRand where
 
 data Input = MoveInput Move | Exit | NewTiles
 type Template = (Char, WordPos, Int, Int)
+type LetterStream = [Char]
+type FullMove = Maybe Move
+type AI = Board -> LetterStream -> [FullMove] -> [FullMove]
+
 
 
 boardFromWord :: String -> Board
-boardFromWord xs = transpose xs
+boardFromWord xs = undefined
 
 
 numOcc :: Char -> String -> Int
@@ -75,3 +83,24 @@ allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
 allWords2 = undefined
 allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
 allWords3 = undefined
+
+greedyBestMove :: Dict -> Rack -> Board -> FullMove
+-- We use read and show to convert between Bram.FullMove and
+-- Scrabble.FullMove.
+greedyBestMove dict rack b = undefined
+
+aiOneMove :: Dict -> State (Board, Rack, LetterStream, [FullMove]) FullMove
+aiOneMove dict = undefined
+
+
+ai :: Dict -> AI
+ai dict = undefined
+
+{-
+convertAIfromBram :: Bram.AI -> AI
+convertAIfromBram ai board stream
+    = undefined
+convertAItoBram :: AI -> Bram.AI
+convertAItoBram ai board stream
+    = undefined
+    -}

@@ -13,6 +13,9 @@ import System.Random
 
 import Sowpods
 
+import Control.Monad.State
+import Data.Either
+import Data.Ord
 import qualified Bram
 --import qualified Blank as Bram
 
@@ -575,11 +578,12 @@ getInput = do
 -- Like readline, but EOF becomes "exit", and automatically builds history.
 getLineFancy :: String -> IO String
 getLineFancy prompt = do
-    mline <- readline prompt
-    case mline of
+      mline <- readline prompt
+      case mline of
         Nothing -> return "exit"
         Just line -> addHistory line >> return line
-
+      putStr prompt
+      getLine
 -- A combination of intersection point, orientation, and how many spaces are
 -- free before/after that point to lay tiles on.
 type Template = (Char, WordPos, Int, Int)
@@ -730,3 +734,256 @@ printBoard b = checks `seq` actuallyPrint
 -- A right-aligned digit under 100.
 show2digs n | 0 <= 0 && n < 10 = " " ++ show n
 show2digs n | 0 <= 0 && n < 100 = show n
+
+
+
+
+
+
+
+
+
+
+-- The additional rather hard exercises, with which you can get >70%, start here.
+--
+-- An infinite list of letters.
+--
+-- We will sometimes give examples with finite letter streams, but when we
+-- mark we always test with infinite lists of letters. So your code does not
+-- have to work with finite lists of letters.
+type LetterStream = [Char]
+
+-- Exercise, rather hard. Generate an infinite list of letters.
+letterStream :: LRand LetterStream
+letterStream = sequence $ repeat newLetter
+--letterStream = let Bram.LRand f = Bram.letterStream in LRand f
+
+-- A FullMove is either a played word, or it is a decision not to play a word
+-- (for instance because there is no valid word you can form.)
+--
+-- Nothing means the computer chooses not to perform a move. This will get rid
+-- of all the letters on the rack, and replenish it from scratch. An AI must
+-- only choose Nothing if it cannot find a word to play.
+type FullMove = Maybe Move
+
+-- Utility code given to you:
+allMoves :: Dict -> Rack -> Board -> [FullMove]
+allMoves dict rack b = [Nothing] ++ properMoves
+  where
+    properMoves :: [FullMove]
+    properMoves = do
+        (c, ((x, y), orient), before, after) <- templates b
+        (word, anchor) <- allWords3 dict rack c before after
+        let (x', y') = shift (x, y) anchor orient
+        return (Just (word, ((x', y'), orient)))
+
+    shift (x, y) k H = (x-k, y)
+    shift (x, y) k V = (x, y-k)
+
+moveScore :: FullMove -> Score
+moveScore Nothing = 0
+moveScore (Just (w, _)) = wordValue w
+
+-- Exercise, rather hard. Find a FullMove of maximum score. If no word can be
+-- played, return Nothing.
+--
+-- Note that multiple answers can be correct, if they have the same (maximum)
+-- score.
+--
+-- Hint: use maximumBy.
+
+greedyBestMove :: Dict -> Rack -> Board -> FullMove
+greedyBestMove dt rack bd = maximumBy (comparing moveScore) all 
+                               where all = allMoves dt rack bd
+
+-- We use read and show to convert between Bram.FullMove and
+-- Scrabble.FullMove.
+greedyBestMove2 dict rack b = read (show (Bram.greedyBestMove dict rack b))
+
+-- The main advanced exercise is about making an AI play against itself.
+--
+-- An AI is a function of the following type. It takes three things:
+--
+--   1. The board on which is must make its first move
+--   2. An infinite list of letters from which the new letters on the rack
+--      will be drawn (a LetterStream which is really just a String)
+--   3. A list of future opponent moves.
+--
+-- An AI function must generate a list of moves it wants to play.
+--
+-- The initial rack is the first seven letters from the LetterStream. As your
+-- AI plays letters, it has to replenish its rack using new letters from the
+-- LetterStream; you MUST NOT use replenishRack. You may peek at the next
+-- letters in the LetterStream, we will allow this in the submission, although
+-- this would normally be considered cheating according to Scrabble rules.
+--
+-- When determining its first move, the AI must not look at any future
+-- opponent moves; this is an error.
+--
+-- The opponent will make its first move depending on the AIs first move.
+-- Obviously, that move will change* the board. The second move of the AI must
+-- consider what moves are valid in the updated board. However, the AI can
+-- still not look at the second move of the opponent. And so on.
+--
+-- After every move of the AI and every move of the opponent, the board must
+-- be autoResized. The initial board is guaranteed to be autoResized.
+--
+--
+-- * Unless the opponent decides to pass.
+
+type AI = Board -> LetterStream -> [FullMove] -> [FullMove]
+
+
+-- Exercise, rather hard. No points, but useful for the next exercise.
+--
+-- Example when there's a move possible:
+--
+-- runState (aiOneMove sowpods) (autoResize (boardFromWord "test"),
+--       "", "abcdefghijklmnop", (repeat undefined))
+--   = (Just ("feedbag",((8,5),V)),(*** Exception: Prelude.undefined
+--
+-- runState (aiOneMove sowpods) (autoResize (boardFromWord "test"),
+--       "", "qqqqqqqqqq", (repeat undefined))
+--   = (Nothing,(*** Exception: Prelude.undefined
+
+aiOneMove :: Dict -> State (Board, Rack, LetterStream, [FullMove]) FullMove
+aiOneMove2 dict = do
+    (b, r, ls, oppMoves) <- get
+    let oppMovesb = map (read.show) oppMoves
+    let (fullMove, (b', r', ls', oppMoves'b)) = runState (Bram.aiOneMove dict) (b, r, ls', oppMovesb)
+    let oppMoves' = map (read.show) oppMoves'b
+    put (b', r', ls', oppMoves')
+    return (read (show fullMove))
+
+aiOneMove dict = do
+                   (b, rack, ls, oppMove:oppMoves) <- get
+                    let xs    = take (7-(length rack)) ls --getting string to fill the rack
+                    let rack' = rack ++ xs -- fill the rack
+                    let ls'   = drop (7-(length rack)) ls
+                    let chosenMove = greedyBestMove dict rack' b  
+                    let b' = case chosenMove of
+                                     Nothing -> b
+                                     Just x  -> autoResize $ writeMove x b
+                    let b'' = case oppMove of
+                                     Nothing -> b'
+                                     Just x  -> autoResize $ writeMove x b'                    
+                    let rack'' = case chosenMove of rack'
+                                     Nothing -> rack'
+                                     Just x  -> rack' \\ x --this is not exactly correct
+                    put (b'', rack'', ls', oppMoves)
+                    return chosenMove
+
+
+-- Exercise, rather hard. Create an AI that plays valid moves.
+--
+-- Whenever there is a valid move available for your AI, you must play it, and
+-- you must play a move with the highest score. (It would be too simple if
+-- your AI could just return an infinite list of Nothings.)
+--
+-- You can assume that the other AI plays only valid moves.
+--
+-- Tip: use the State monad and runState or evalState.
+--
+-- If you have made an AI, you can test it against our AI like this:
+--
+--   Bram.connectAI b (convertAItoBram (ai sowpods),
+--       "abcdefgqqqqqqqhijklmnopqrstuvwxyz") (Bram.ai sowpods,
+--       "abcdefghijklmnopqrstuvwxyz")
+--
+-- Your AI does not have to generate the same moves as Bram.ai. But you must
+-- always a move with optimal value on the board.
+
+ai :: Dict -> AI
+ai dict = convertAIfromBram (Bram.ai dict)
+
+convertAIfromBram :: Bram.AI -> AI
+convertAIfromBram ai board stream
+    = map (read . show) . ai board stream . map (read . show)
+convertAItoBram :: AI -> Bram.AI
+convertAItoBram ai board stream
+    = map (read . show) . ai board stream . map (read . show)
+
+-- Utility code given to you:
+--
+-- Merges 2 lists to a combined list with elements alternatingly from either
+-- list.
+mergeLists :: [a] -> [a] -> [a]
+mergeLists (x:xs) ys = x : mergeLists ys xs
+mergeLists [] ys = ys
+
+-- Exercise, rather hard. Given two AIs, and their initial letter streams and racks,
+-- play them against each other. Return the list of all moves, that is, first
+-- a move by the first AI, then by the second AI, then a move by the first AI,
+-- etc.
+--
+-- You are also given an initial board, and a LetterStream for each AI. The
+-- left AI goes first.
+--
+-- As usual, the order of the rack does not matter. You can assume that both
+-- AIs play only valid moves.
+--
+-- Example:
+--
+-- let b = autoResize $ boardFromWord "haskell"
+--
+-- connectAI b (ai sowpods, "abcdefgqqqqqqqhijklmnopqrstuvwxyzabcdefghijkl" ++
+-- undefined) (ai sowpods, "abcdefghijklmnopqrstuvwxyzabcdefghijkl" ++
+-- undefined)
+--
+--   = [Just ("backed",((10,4),V)),Just ("chafed",((7,9),V)),
+--      Just ("feg",((6,13),H)),Just ("bhaji",((9,8),H)),
+--      Just ("qi",((13,7),V)),Just ("polka",((4,11),H)),
+--      Just ("oh",((8,11),V)),Nothing,Just ("qi",((16,7),H)),
+--      Just ("lazy",((17,10),V)),Just ("qi",((17,6),V)),
+--      Just ("ax",((17,12),H)),Just ("ky",((16,14),H)),
+--      Just ("cubeb",((12,5),V)),Nothing,Just ("wich",((10,7),H)), ...
+--
+-- connectAI (autoResize $ boardFromWord "test") (ai sowpods,
+-- "qqqqqqqabcdefghijklmn" ++ undefined) (ai sowpods, "qqqqqqqabcdefghijklmn"
+-- ++ undefined)
+--
+--   = [Just ("qi",((11,6),V)),Nothing,Just ("ma",((7,8),V)),
+--      Just ("farced",((9,6),V)),Just ("be",((8,11),H)), ...
+--
+-- Note that in this example, first the second player passes and then the first player.
+
+connectAI :: Board -> (AI, LetterStream) -> (AI, LetterStream) -> [FullMove]
+connectAI b (ai1, ls1) (ai2, ls2) = map (read.show) $ Bram.connectAI b (bai1, ls1) (bai2, ls2)
+  where
+    bai1 = convertAItoBram ai1
+    bai2 = convertAItoBram ai2
+
+-- Utility code given to you:
+--
+-- Given an initial board, and a list of moves that 2 AIs play against each
+-- other, print all the intermediate boards.
+--
+-- Example:
+--
+--     let b = autoResize $ boardFromWord "haskell"
+--
+--     let alpha = ['a'..'z']
+--
+--     printIntermediateBoards b (connectAI b (ai sowpods, alpha) (ai sowpods, alpha))
+--
+-- Tip: in many terminals, you can adjust the font size with Ctrl+Minus and
+-- Ctrl+Shift+Plus.
+
+printIntermediateBoards :: Board -> [FullMove] -> IO ()
+printIntermediateBoards b moves = do
+    if b /= autoResize b
+      then error "printIntermediateBoards: error: board not autoResized"
+      else return ()
+    printBoard b
+    case moves of
+      [] -> return ()
+      (Nothing:moves') -> printIntermediateBoards b moves'
+      (Just move:moves') -> printIntermediateBoards (newBoard) moves'
+          where newBoard = autoResize (writeMove move b)
+
+
+-- If you have loaded sample solutions, then
+--
+--     Bram.version
+--
+-- will show you what version it is. If Bram.version does not exist, then it was version 1.
