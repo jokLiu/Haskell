@@ -250,7 +250,7 @@ moveLetter move@(w, ((x, y), _)) (x', y') = do
 boardFromWord :: String -> Board
 boardFromWord xs = [ [Just d] | b <- bd, d <- b ]
                   where bd = transpose [xs]
---boardFromWord2 = Bram.boardFromWord
+--boardFromWord = Bram.boardFromWord
 
 -- Exercise, basic. Count the number of occurrences of a character in a string.
 --
@@ -258,7 +258,7 @@ boardFromWord xs = [ [Just d] | b <- bd, d <- b ]
 
 numOcc :: Char -> String -> Int
 numOcc ch xs = length (filter (\x -> x==ch) xs)
---numOcc2 = Bram.numOcc
+--numOcc = Bram.numOcc
 
 -- Exercise, medium. Given two words, determine whether you can make
 -- the left word with the letters of the right word. You do not need
@@ -272,7 +272,7 @@ numOcc ch xs = length (filter (\x -> x==ch) xs)
 
 submultiset :: String -> String -> Maybe String
 submultiset xs zs = if null (xs \\ zs) then Just (zs \\ xs) else Nothing      
---submultiset2 = Bram.submultiset
+--submultiset = Bram.submultiset
 
 -- Exercise, medium. Given a word, a list of letters on your rack, and the
 -- intersection point letter c, determine whether you can form the word on the
@@ -284,7 +284,7 @@ submultiset xs zs = if null (xs \\ zs) then Just (zs \\ xs) else Nothing
 
 formable :: String -> Rack -> Char -> Maybe String
 formable xs rck ch = submultiset xs (ch:rck)
---formable2 = Bram.formable
+--formable = Bram.formable
 
 -- Utility code given to you:
 letterValue :: Char -> Score
@@ -304,7 +304,7 @@ letterValue c | otherwise = error "not a valid letter"
 
 wordValue :: String -> Score
 wordValue xs = sum [letterValue x | x <- xs] 
---wordValue2 = Bram.wordValue
+--wordValue = Bram.wordValue
 
 -- Exercise, basic.
 --
@@ -313,7 +313,7 @@ wordValue xs = sum [letterValue x | x <- xs]
 invertBoard :: Board -> Board
 invertBoard bd = [ reverse r | r <- rev ]
                 where rev = reverse bd
---invertBoard2 = Bram.invertBoard
+--invertBoard = Bram.invertBoard
 
 
 -- Exercise, hard.
@@ -336,7 +336,7 @@ autoResize bd = bd3
                       (west, east)  = autoResHelper bd2 (7,7)
                       bd2           = transpose (buildResize bd (north,south))
                       (north,south) = autoResHelper bd (7,7)
---autoResize2 = Bram.autoResize
+--autoResize = Bram.autoResize
 
 
 --function which adds the Nothing to make board of the right size
@@ -385,17 +385,16 @@ playMove rack move@(w, ((x, y), orient)) dict b = do
 -- can assume that the given move is valid on the given board.
 
 writeMove :: Move -> Board -> Board
+--writeMove = Bram.writeMove . read . show
 
 writeMove (wrd,((x,y),V)) bd =  (take x bd) ++ [((take y (bd !! x)) ++ (strToCharList wrd) ++ (drop (y+(length wrd)) (bd !! x)))] ++ (drop (x+1) bd) 
 writeMove (wrd,((x,y),H)) bd =  transpose ((take y bd2) ++ [((take x (bd2 !! y)) ++ (strToCharList wrd) ++ (drop (x+(length wrd)) (bd2 !! y)))] ++ (drop (y+1) bd2))
                                 where bd2 = transpose bd
 
-
 -- string to a list of maybe characters
 strToCharList :: String -> [Maybe Char]
 strToCharList xs = [Just x | x <- xs]
 
---writeMove = Bram.writeMove . read . show
 
 
 -- Exercise, medium/hard. We now move to randomly adding letters to the rack.
@@ -515,13 +514,13 @@ letterFrequencies = [
 -- below easier to implement.
 newLetter :: LRand Char
 newLetter = fromList letterFrequencies
---newLetter2 = let Bram.LRand f = Bram.newLetter in LRand f
+newLetter2 = let Bram.LRand f = Bram.newLetter in LRand f
 
 -- Exercise, medium/hard. Given a rack, randomly fill it with random
 -- letters, to have rackSize many letters.
 replenishRack :: Rack -> LRand Rack
 replenishRack rk = do { x <- sequence (take (rackSize-(length rk)) (replicate rackSize newLetter)); return (rk++x) } 
---replenishRack2 rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
+replenishRack2 rack = let Bram.LRand f = Bram.replenishRack rack in LRand f
 
 -- Code for visually testing your solution: let you play against yourself.
 --
@@ -639,7 +638,7 @@ transposeTemp (c, wpos, before, after)
 
 allWords1 :: Dict -> Char -> [String]
 allWords1 dt n = filter (\xs -> n `elem` xs) dt
---allWords11 = Bram.allWords1
+allWords11 = Bram.allWords1
 
 -- Exercise, hard.
 --
@@ -671,7 +670,7 @@ allWords1 dt n = filter (\xs -> n `elem` xs) dt
 -- (You may give the words in a different order.)
 
 allWords2 :: Dict -> Char -> Int -> Int -> [(String, Int)]
---allWords22 = Bram.allWords2
+allWords22 = Bram.allWords2
 allWords2 dict ch low up = concat [ fitList (findPosition str ch []) str low up | str <- (allWords1 dict ch) ]
 
 
@@ -708,7 +707,7 @@ allWords3 :: Dict -> Rack -> Char -> Int -> Int -> [(String, Int)]
 allWords3 dict rack ch low up = allWords2 ls ch low up
                                   where ls = [ x |  x <- dict , ((length $ (rack++[ch])\\x) == ((length (rack++[ch])) - (length x)))]
 
---allWords33 = Bram.allWords3
+allWords33 = Bram.allWords3
 
 
 
@@ -799,6 +798,7 @@ greedyBestMove dt rack bd = maximumBy (comparing moveScore) all
 
 -- We use read and show to convert between Bram.FullMove and
 -- Scrabble.FullMove.
+greedyBestMove2 :: Dict -> Rack -> Board -> FullMove
 greedyBestMove2 dict rack b = read (show (Bram.greedyBestMove dict rack b))
 
 -- The main advanced exercise is about making an AI play against itself.
@@ -848,32 +848,45 @@ type AI = Board -> LetterStream -> [FullMove] -> [FullMove]
 --   = (Nothing,(*** Exception: Prelude.undefined
 
 aiOneMove :: Dict -> State (Board, Rack, LetterStream, [FullMove]) FullMove
-aiOneMove2 dict = do
-    (b, r, ls, oppMoves) <- get
-    let oppMovesb = map (read.show) oppMoves
-    let (fullMove, (b', r', ls', oppMoves'b)) = runState (Bram.aiOneMove dict) (b, r, ls', oppMovesb)
-    let oppMoves' = map (read.show) oppMoves'b
-    put (b', r', ls', oppMoves')
-    return (read (show fullMove))
 
 aiOneMove dict = do
                    (b, rack, ls, oppMove:oppMoves) <- get
-                    let xs    = take (7-(length rack)) ls --getting string to fill the rack
-                    let rack' = rack ++ xs -- fill the rack
-                    let ls'   = drop (7-(length rack)) ls
-                    let chosenMove = greedyBestMove dict rack' b  
-                    let b' = case chosenMove of
+                   let xs    = take (7-(length rack)) ls --getting string to fill the rack
+                   let rack' = rack ++ xs -- fill the rack
+                   let ls'   = drop (7-(length rack)) ls
+                   let chosenMove = greedyBestMove dict rack' b  
+                   let b' = case chosenMove of
                                      Nothing -> b
                                      Just x  -> autoResize $ writeMove x b
-                    let b'' = case oppMove of
+                   let b'' = case oppMove of
                                      Nothing -> b'
-                                     Just x  -> autoResize $ writeMove x b'                    
-                    let rack'' = case chosenMove of rack'
-                                     Nothing -> rack'
-                                     Just x  -> rack' \\ x --this is not exactly correct
-                    put (b'', rack'', ls', oppMoves)
-                    return chosenMove
+                                     Just x  -> autoResize $ writeMove x b' 
+                   --
+                   let str  = case chosenMove of
+                                        Nothing -> ""
+                                        Just x  -> fst x
+                   let ch = findChar chosenMove b
+                   let str2 = case ch of
+                                        Nothing -> str
+                                        Just x  -> str \\ [x]
+                   --
+                   let rack'' = rack' \\ str2
+                   --let rack'' = case chosenMove of
+                   --                 Nothing -> rack'
+                   --                  Just x  -> rack' \\ (fst  x) --this is not exactly correct
+                   put (b'', rack'', ls', oppMoves)
+                   return chosenMove
 
+
+{-
+aiOneMove dict = do
+    (b, r, ls, oppMoves) <- get
+    let oppMovesb = map (read.show) oppMoves
+    let (fullMove, (b', r', ls', oppMoves'b)) = runState (Bram.aiOneMove dict) (b, r, ls, oppMovesb)
+    let oppMoves' = map (read.show) oppMoves'b
+    put (b', r', ls', oppMoves')
+    return (read (show fullMove))
+-}
 
 -- Exercise, rather hard. Create an AI that plays valid moves.
 --
@@ -887,7 +900,7 @@ aiOneMove dict = do
 --
 -- If you have made an AI, you can test it against our AI like this:
 --
---   Bram.connectAI b (convertAItoBram (ai sowpods),
+--   Bram.connectAI (autoResize $ boardForward "testing") (convertAItoBram (ai sowpods),
 --       "abcdefgqqqqqqqhijklmnopqrstuvwxyz") (Bram.ai sowpods,
 --       "abcdefghijklmnopqrstuvwxyz")
 --
@@ -895,7 +908,18 @@ aiOneMove dict = do
 -- always a move with optimal value on the board.
 
 ai :: Dict -> AI
-ai dict = convertAIfromBram (Bram.ai dict)
+ai dict = let f rack board stream oppMovesb =
+                  do 
+                     let sMove = aiOneMove dict
+                     let (move, (b,r,ls,oppMoves)) = runState sMove (board, rack, stream, oppMovesb)
+                     let (r',ls') = case move of
+                                            Nothing -> ((take 7 ls),(drop 7 ls))
+                                            Just _  -> (r,ls)
+                     (move: f r' b ls' oppMoves )
+          in f ""
+
+ai2 dict = convertAIfromBram (Bram.ai dict)
+
 
 convertAIfromBram :: Bram.AI -> AI
 convertAIfromBram ai board stream
@@ -947,9 +971,35 @@ mergeLists [] ys = ys
 --      Just ("farced",((9,6),V)),Just ("be",((8,11),H)), ...
 --
 -- Note that in this example, first the second player passes and then the first player.
+--type AI = Board -> LetterStream -> [FullMove] -> [FullMove]
 
 connectAI :: Board -> (AI, LetterStream) -> (AI, LetterStream) -> [FullMove]
-connectAI b (ai1, ls1) (ai2, ls2) = map (read.show) $ Bram.connectAI b (bai1, ls1) (bai2, ls2)
+
+
+connectAI bd (ai1, ls1) (ai2, ls2) =  let play bd' (ai1', ls1') (ai2', ls2') = do
+                                            let move = head (ai1' bd' ls1' (repeat Nothing)) 
+                                            let bd'' = case move of
+                                                                 Nothing -> bd'
+                                                                 Just x  -> autoResize $ writeMove x bd'
+                                            let str  = case move of
+                                                                 Nothing -> ""
+                                                                 Just x  -> fst x
+                                            let ch = findChar move bd'
+                                            let str2 = case ch of
+                                                                 Nothing -> str
+                                                                 Just x  -> str \\ [x]
+                                            --let ls1'' = ((take 7 ls1') \\ str2) ++ (drop 7 ls1')
+                                            let ls1'' = case move of
+                                                                 Nothing -> drop 7 ls1'
+                                                                 Just _  -> ((take 7 ls1') \\ str2) ++ (drop 7 ls1')
+                                            (move : (play bd'' (ai2', ls2') (ai1', ls1'')))
+                                      in play bd (ai1, ls1) (ai2, ls2)
+                                         
+                                 
+
+
+connectAI2 :: Board -> (AI, LetterStream) -> (AI, LetterStream) -> [FullMove]
+connectAI2 b (ai1, ls1) (ai2, ls2) = map (read.show) $ Bram.connectAI b (bai1, ls1) (bai2, ls2)
   where
     bai1 = convertAItoBram ai1
     bai2 = convertAItoBram ai2
@@ -988,3 +1038,28 @@ printIntermediateBoards b moves = do
 --     Bram.version
 --
 -- will show you what version it is. If Bram.version does not exist, then it was version 1.
+{-
+type Pos = (Int, Int)
+
+-- An orientation can be horizontal (H) or vertical (V):
+data Orient = H | V deriving (Show, Eq, Read)
+
+-- A word position is a start position together with an orientation:
+type WordPos = (Pos, Orient)
+
+-- A move is a word (represented as a String) together with a position:
+type Move = (String, WordPos)
+-}
+
+--finding the char which is in the string
+{-
+findCharMain :: Move -> Board -> String
+findCharMain mv bd = do mm <- (findChar mv bd)
+                        m  <- mm 
+                        [m]
+-}
+
+findChar :: FullMove -> Board -> (Maybe Char)
+findChar (Nothing )   _         = Nothing
+findChar (Just (_,((x,y),V))) bd = do { z <- find (\z -> z /= Nothing) (drop y (bd !! x)); a <- z; return a}
+findChar (Just (_,((x,y),H))) bd = do { z <- find (\z -> z /= Nothing) (drop x ((transpose bd)!!y)); a <- z; return a}
